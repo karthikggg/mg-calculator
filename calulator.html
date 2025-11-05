@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Decimal Combination Finder</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+                  url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+ 
+    .container {
+      max-width: 650px;
+      margin: 60px auto;
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+ 
+    h2 {
+      text-align: center;
+      color: #00796b;
+      margin-bottom: 20px;
+    }
+ 
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      color: #444;
+    }
+ 
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+ 
+    textarea {
+      height: 140px;
+      resize: vertical;
+    }
+ 
+    button {
+      background-color: #00796b;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
+    }
+ 
+    button:hover {
+      background-color: #004d40;
+    }
+ 
+    .results {
+      margin-top: 30px;
+    }
+ 
+    .combo {
+      background: #e0f2f1;
+      color: #004d40;
+      padding: 10px 12px;
+      margin: 6px 0;
+      border-radius: 6px;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+ 
+    .results h3 {
+      color: #00796b;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Decimal Combination Finder</h2>
+    <label>Target Value:</label>
+    <input type="number" step="any" id="target" placeholder="e.g. 23.3" />
+    <label>Numbers (paste vertically from Excel):</label>
+    <textarea id="numbers" placeholder="e.g.\n1.1\n2.2\n3.3"></textarea>
+    <button onclick="findCombinations()">Find Combinations</button>
+    <div class="results" id="results"></div>
+  </div>
+ 
+  <script>
+    function findCombinations() {
+      const target = parseFloat(document.getElementById('target').value);
+      const nums = document.getElementById('numbers').value
+        .split('\n')
+        .map(n => parseFloat(n.trim()))
+        .filter(n => !isNaN(n));
+      const results = [];
+ 
+      function backtrack(start, combo, sum, counts) {
+        if (Math.abs(sum - target) < 0.0001) {
+          results.push([...combo]);
+          return;
+        }
+        if (sum > target) return;
+ 
+        for (let i = start; i < nums.length; i++) {
+          const num = nums[i];
+          const used = counts[num] || 0;
+          if (used >= 4) continue;
+ 
+          combo.push(num);
+          counts[num] = used + 1;
+          backtrack(i, combo, sum + num, counts);
+          combo.pop();
+          counts[num] = used;
+        }
+      }
+ 
+      backtrack(0, [], 0, {});
+      results.sort((a, b) => a.reduce((x,y)=>x+y,0) - b.reduce((x,y)=>x+y,0));
+ 
+      const output = document.getElementById('results');
+      output.innerHTML = `<h3>${results.length} combinations found:</h3>`;
+      results.forEach(c => {
+        output.innerHTML += `<div class="combo">${c.join(' + ')} = ${target}</div>`;
+      });
+    }
+  </script>
+</body>
+</html>
+ 
